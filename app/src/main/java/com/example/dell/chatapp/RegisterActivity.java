@@ -20,6 +20,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.w3c.dom.Text;
 
@@ -84,12 +85,14 @@ public class RegisterActivity extends AppCompatActivity {
                             FirebaseUser currentUser=mAuth.getCurrentUser();
                             String uid=currentUser.getUid();
                             mDatabase=FirebaseDatabase.getInstance().getReference().child("users").child(uid);
+                            String device_token= FirebaseInstanceId.getInstance().getToken();
 
                             HashMap<String,String> userMap=new HashMap<>();
                             userMap.put("name",name);
                             userMap.put("status","default");
                             userMap.put("image","default");
                             userMap.put("thumb_image","default");
+                            userMap.put("device_token",device_token);
                             mDatabase.setValue(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
@@ -97,6 +100,7 @@ public class RegisterActivity extends AppCompatActivity {
                                     mprogressDialog.dismiss();
 
                                     Intent mainIntent=new Intent(RegisterActivity.this,MainActivity.class);
+                                    mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                     startActivity(mainIntent);
                                     finish();
 
