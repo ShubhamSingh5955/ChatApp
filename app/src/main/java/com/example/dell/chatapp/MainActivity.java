@@ -12,6 +12,9 @@ import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager mViewPager;
 
     private FirebaseAuth mAuth;
+    private DatabaseReference mUsersRef;
+    private String mCurrent_user;
 
     private Toolbar mToolbar;
 
@@ -39,6 +44,12 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("ChatApp");
 
         mAuth = FirebaseAuth.getInstance();
+        mCurrent_user=mAuth.getCurrentUser().getUid();
+
+        if(mAuth.getCurrentUser()!=null)
+        {
+            mUsersRef = FirebaseDatabase.getInstance().getReference().child("users").child(mCurrent_user);
+        }
 
         msectionPagerAdapter=new SectionPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(msectionPagerAdapter);
@@ -51,6 +62,21 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser==null){
           sendToStart();
+        }else{
+
+            mUsersRef.child("online").setValue("true");
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser!=null) {
+
+            mUsersRef.child("online").setValue(ServerValue.TIMESTAMP);
+
         }
     }
 

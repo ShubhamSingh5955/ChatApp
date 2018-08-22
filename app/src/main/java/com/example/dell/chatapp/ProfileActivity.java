@@ -222,8 +222,8 @@ public class ProfileActivity extends AppCompatActivity {
                     if (current_state.equals("request_received")){
                         String current_time= DateFormat.getDateTimeInstance().format(new Date());
                         Map requestMap=new HashMap();
-                        requestMap.put("friends/" + mCurrent_user.getUid()+ "/" +user_id+ "/" + "request_type",current_time);
-                        requestMap.put("friends/" + user_id+ "/" +mCurrent_user.getUid()+ "/" + "request_type",current_time);
+                        requestMap.put("friends/" + mCurrent_user.getUid()+ "/" +user_id+ "/" + "date",current_time);
+                        requestMap.put("friends/" + user_id+ "/" +mCurrent_user.getUid()+ "/" + "date",current_time);
 
                         requestMap.put("friend_request/" + mCurrent_user.getUid()+ "/" +user_id+ "/" + "request_type",null);
                         requestMap.put("friend_request/" + user_id+ "/" +mCurrent_user.getUid()+ "/" + "request_type",null);
@@ -234,7 +234,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                                     sendReqButton.setEnabled(true);
                                     current_state = "friends";
-                                    sendReqButton.setText("Unfriend this Person");
+                                    sendReqButton.setText("UNFRIEND THIS PERSON");
                                     declineReqButton.setVisibility(View.INVISIBLE);
                                     declineReqButton.setEnabled(false);
 
