@@ -1,6 +1,7 @@
 package com.example.dell.chatapp;
 
 import android.content.Context;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,8 +26,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,17 +42,20 @@ public class ChatActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
 
-    private DatabaseReference mRootRef;
+    private DatabaseReference mRootRef,mUserRef;
     private FirebaseAuth mAuth;
     private String mCurrentUserId;
 
     private TextView textName,textSeen;
-    private CircleImageView circleImageView;
+    private CircleImageView circleImageViewToolbar;
     private ImageButton sendMessageButton,addMeaasgeButton;
     private EditText mMessageView;
     private RecyclerView recyclerView;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     private String mChatUser,UserName;
+    private static final int TOTAL_ITEM_TO_LOAD=10;
+    private int mCurrentPage=1;
 
     private List<Message> messageList=new ArrayList<>();
     private LinearLayoutManager linearLayoutManager;
@@ -68,15 +74,24 @@ public class ChatActivity extends AppCompatActivity {
         sendMessageButton=(ImageButton) findViewById(R.id.send_message_imageButton);
 
         mAdapter=new MessageAdapter(messageList);
+        swipeRefreshLayout=(SwipeRefreshLayout)findViewById(R.id.swipe_refesh_layout);
+
+        //----recycler-----------
+
         recyclerView=(RecyclerView)findViewById(R.id.meassage_list);
         linearLayoutManager=new LinearLayoutManager(this);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(mAdapter);
 
+        //------database------------
+
         mRootRef= FirebaseDatabase.getInstance().getReference();
         mAuth=FirebaseAuth.getInstance();
         mCurrentUserId=mAuth.getCurrentUser().getUid();
+        mUserRef = mRootRef.child("users").child(mCurrentUserId);
+
+        //--------toolbar---------
 
         mToolbar=(Toolbar) findViewById(R.id.chat_app_bar);
         setSupportActionBar(mToolbar);
@@ -93,7 +108,7 @@ public class ChatActivity extends AppCompatActivity {
 
         textName=(TextView)findViewById(R.id.custom_bar_title);
         textSeen=(TextView)findViewById(R.id.custom_bar_seen);
-        circleImageView=(CircleImageView)findViewById(R.id.custom_bar_image);
+        circleImageViewToolbar=(CircleImageView)findViewById(R.id.custom_bar_image);
 
         textName.setText(UserName);
         mRootRef.child("users").child(mChatUser).addValueEventListener(new ValueEventListener() {
@@ -102,7 +117,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 String image=dataSnapshot.child("image").getValue().toString();
                 String online=dataSnapshot.child("online").getValue().toString();
-
+                Picasso.get().load(image).into(circleImageViewToolbar);
                 if(online.equals("true")){
                     textSeen.setText("Online");
                 }else{
@@ -159,10 +174,22 @@ public class ChatActivity extends AppCompatActivity {
 
         loadMessage();
 
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mCurrentPage++;
+                messageList.clear();
+                loadMessage();
+            }
+        });
     }
 
     private void loadMessage() {
-        mRootRef.child("message").child(mCurrentUserId).child(mChatUser).addChildEventListener(new ChildEventListener() {
+            DatabaseReference messageRef= mRootRef.child("message").child(mCurrentUserId).child(mChatUser);
+
+            Query message_query=messageRef.limitToLast(mCurrentPage*TOTAL_ITEM_TO_LOAD);
+
+        message_query.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
@@ -170,6 +197,8 @@ public class ChatActivity extends AppCompatActivity {
                 messageList.add(message);
                 mAdapter.notifyDataSetChanged();
 
+                recyclerView.scrollToPosition(messageList.size()-1);
+                swipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
@@ -211,11 +240,11 @@ public class ChatActivity extends AppCompatActivity {
             messageMap.put("time",ServerValue.TIMESTAMP);
             messageMap.put("from",mCurrentUserId);
 
-            mMessageView.setText("");
-
             Map messageUserMap=new HashMap();
             messageUserMap.put(current_user_Ref+"/"+push_id,messageMap);
             messageUserMap.put(chat_user_Ref+"/"+push_id,messageMap);
+
+            mMessageView.setText("");
 
             mRootRef.updateChildren(messageUserMap, new DatabaseReference.CompletionListener() {
                 @Override
@@ -228,6 +257,15 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mUserRef.child("online").setValue("true");
+    }
 
+    @Override
+    protected void onStop() {
 
+        super.onStop();
+    }
 }

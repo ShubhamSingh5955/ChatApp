@@ -111,7 +111,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                         }else  if(req_type.equals("sent")){
                             current_state="request_sent";
-                            sendReqButton.setText(" CANCLE REQUEST ");
+                            sendReqButton.setText(" CANCLE FRIEND REQUEST ");
 
                             declineReqButton.setVisibility(View.INVISIBLE);
                             declineReqButton.setEnabled(false);
@@ -189,7 +189,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                                 } else {
                                     current_state= "req_sent";
-                                    sendReqButton.setText("Cancel Friend Request");
+                                    sendReqButton.setText("CANCLE FRIEND REQUEST");
                                 }
                                 sendReqButton.setEnabled(true);
                             }
@@ -199,9 +199,11 @@ public class ProfileActivity extends AppCompatActivity {
 
             //----------------Cancle request -------------------
                     if (current_state.equals("request_sent")){
+
                         Map requestMap=new HashMap();
                         requestMap.put(mCurrent_user.getUid()+ "/" +user_id+ "/" + "request_type",null);
                         requestMap.put(user_id+ "/" +mCurrent_user.getUid()+ "/" + "request_type",null);
+
                         mfriendRequestDatabase.updateChildren(requestMap, new DatabaseReference.CompletionListener() {
                             @Override
                             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
@@ -222,11 +224,13 @@ public class ProfileActivity extends AppCompatActivity {
                     if (current_state.equals("request_received")){
                         String current_time= DateFormat.getDateTimeInstance().format(new Date());
                         Map requestMap=new HashMap();
+
                         requestMap.put("friends/" + mCurrent_user.getUid()+ "/" +user_id+ "/" + "date",current_time);
                         requestMap.put("friends/" + user_id+ "/" +mCurrent_user.getUid()+ "/" + "date",current_time);
 
                         requestMap.put("friend_request/" + mCurrent_user.getUid()+ "/" +user_id+ "/" + "request_type",null);
                         requestMap.put("friend_request/" + user_id+ "/" +mCurrent_user.getUid()+ "/" + "request_type",null);
+
                         mRootRef.updateChildren(requestMap, new DatabaseReference.CompletionListener() {
                             @Override
                             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
@@ -256,8 +260,16 @@ public class ProfileActivity extends AppCompatActivity {
                     if(current_state.equals("friends")){
 
                         Map unfriendMap = new HashMap();
+
                         unfriendMap.put("friends/" + mCurrent_user.getUid() + "/" + user_id, null);
                         unfriendMap.put("friends/" + user_id + "/" + mCurrent_user.getUid(), null);
+
+                        unfriendMap.put("message/" + mCurrent_user.getUid() + "/" + user_id, null);
+                        unfriendMap.put("message/" + user_id + "/" + mCurrent_user.getUid(), null);
+
+                        unfriendMap.put("Chat/" + mCurrent_user.getUid() + "/" + user_id, null);
+                        unfriendMap.put("Chat/" + user_id + "/" + mCurrent_user.getUid(), null);
+
 
                         mRootRef.updateChildren(unfriendMap, new DatabaseReference.CompletionListener() {
                             @Override
@@ -291,6 +303,27 @@ public class ProfileActivity extends AppCompatActivity {
 
                 }});
 
+        declineReqButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Map requestMap=new HashMap();
+                requestMap.put(mCurrent_user.getUid()+ "/" +user_id+ "/" + "request_type",null);
+                requestMap.put(user_id+ "/" +mCurrent_user.getUid()+ "/" + "request_type",null);
+
+                mfriendRequestDatabase.updateChildren(requestMap, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+                        sendReqButton.setEnabled(true);
+                        sendReqButton.setText("SEND FRIEND REQUEST");
+                        current_state="not_friends";
+
+                        declineReqButton.setVisibility(View.INVISIBLE);
+                        declineReqButton.setEnabled(false);
+                    }
+                });
+            }
+        });
 
     }
 

@@ -1,6 +1,7 @@
 package com.example.dell.chatapp;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -43,12 +44,14 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle("ChatApp");
 
-        mAuth = FirebaseAuth.getInstance();
-        mCurrent_user=mAuth.getCurrentUser().getUid();
+        mTabLayout.setSelectedTabIndicatorColor(Color.parseColor("#FF0000"));
+        mTabLayout.setSelectedTabIndicatorHeight((int) (5 * getResources().getDisplayMetrics().density));
+        mTabLayout.setTabTextColors(Color.parseColor("#727272"), Color.parseColor("#ffffff"));
 
-        if(mAuth.getCurrentUser()!=null)
-        {
-            mUsersRef = FirebaseDatabase.getInstance().getReference().child("users").child(mCurrent_user);
+        mAuth = FirebaseAuth.getInstance();
+
+        if(mAuth.getCurrentUser()!=null){
+            mUsersRef = FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid());
         }
 
         msectionPagerAdapter=new SectionPagerAdapter(getSupportFragmentManager());
