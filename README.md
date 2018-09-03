@@ -8,6 +8,8 @@ To user this app you have to create account by clicking "NEED AN ACCOUNT" button
 After Registration process you have to send request to another user of this app through request.
 now the chat list is open and you can chat with another user.
 You can also change your Profile Photo from Account Settings.
+<br>
+because of FirebaseMessagingService not work in background the app can't redirect user to Profile activity when app is closed or in background but when app is in foreground the notification feature work.
 
 This app has been tested on Sumsumg J7 API 25.
 <br>
