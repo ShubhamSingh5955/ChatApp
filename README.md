@@ -11,7 +11,7 @@ You can also change your Profile Photo from Account Settings.
 <br>
 because of FirebaseMessagingService not work in background the app can't redirect user to Profile activity when app is closed or in background but when app is in foreground the notification feature work.
 
-This app has been tested on Sumsumg J7 API 25.
+This app has been tested on Sumsung J7 API 25.
 <br>
 Screenshots
  <p align = 'center'>
